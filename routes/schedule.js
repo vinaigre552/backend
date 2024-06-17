@@ -1,20 +1,13 @@
 const express = require('express')
 const router = express.Router()
-const jwt = require('../utils/token')
-var query = require('../sql')
-
+const isExpire = require('../utils/common')
+const query = require('../sql')
+const moment = require('moment')
+// 获取日程列表
 router.post('/', async (req, res, next) => {
-  const ifValue = jwt.decrypt(req.headers.authorization)
-  if (!ifValue.token) {
-    res.status(401).json({
-      code: 401,
-      msg: '登录过期'
-    })
-    res.end()
-  } else {
+  if (!isExpire(req, res)) {
     const pageInfo = req.body
-    const pageNum = pageInfo.pageNum
-    const pageSize = pageInfo.pageSize
+    const {pageNum, pageSize} = pageInfo
   
     // 判断数据有效性
     if (parseInt(pageNum) < 1 || isNaN(parseInt(pageNum)) || parseInt(pageSize) < 1 || isNaN(parseInt(pageSize))) {
@@ -32,6 +25,33 @@ router.post('/', async (req, res, next) => {
     res.send(pageData)
     res.end()
   }
+})
+
+// 添加新日程信息
+router.post('/info', async(req, res, next) => {
+  if (!isExpire(req, res)) {
+    const schedule = req.body
+    let {name, start_time, end_time, remark} = schedule
+    start_time = moment(start_time).format('YYYY-MM-DD HH:DD:MM')
+    end_time = moment(end_time).format('YYYY-MM-DD HH:DD:MM')
+
+    const result = await query('insert into schedule(name, start_time, end_time, remark) values(?, ?, ?, ?)', [name, start_time, end_time, remark])
+    if (result) {
+      res.send({
+        code: 200,
+        data: '',
+        msg: '添加成功'
+      })
+      res.end()
+    } else {
+      res.send({
+        code: 300,
+        data: '',
+        msg: '发生错误'
+      })
+      res.end()
+    }
+  } 
 })
 
 module.exports = router

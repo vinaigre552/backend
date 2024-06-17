@@ -1,8 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const query = require("../sql.js");
-const jwt = require("../utils/token.js");
-
+const jwt = require("../utils/token.js")
 router.get("/", function (req, res, next) {
   res.render("users");
 });
