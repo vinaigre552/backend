@@ -19,8 +19,10 @@ router.post('/', async (req, res, next) => {
     const result = await query('select * from schedule limit ?, ?', [startIndex, pageSize])
     const count = await query('select count(*) count from  schedule')
     const pageData = {
-      total: count[0].count,
-      data: result
+      data: {
+        data: result,
+        total: count[0].count
+      }
     }
     res.send(pageData)
     res.end()
@@ -31,11 +33,12 @@ router.post('/', async (req, res, next) => {
 router.post('/info', async(req, res, next) => {
   if (!isExpire(req, res)) {
     const schedule = req.body
-    let {name, start_time, end_time, remark} = schedule
+    let {name, start_time, end_time, remark, status} = schedule
     start_time = moment(start_time).format('YYYY-MM-DD HH:DD:MM')
     end_time = moment(end_time).format('YYYY-MM-DD HH:DD:MM')
 
-    const result = await query('insert into schedule(name, start_time, end_time, remark) values(?, ?, ?, ?)', [name, start_time, end_time, remark])
+    const result = await query('insert into schedule(name, start_time, end_time, remark, status) values(?, ?, ?, ?, ?)', [name, start_time, end_time, remark, status])
+    
     if (result) {
       res.send({
         code: 200,
@@ -52,6 +55,55 @@ router.post('/info', async(req, res, next) => {
       res.end()
     }
   } 
+})
+
+// 更新日程信息
+router.post('/info/update', async(req, res, next) => {
+  if (!isExpire(req, res)) {
+    const schedule = req.body
+    let {id, name, start_time, end_time, remark, status} = schedule
+    start_time = moment(start_time).format('YYYY-MM-DD HH:DD:MM')
+    end_time = moment(end_time).format('YYYY-MM-DD HH:DD:MM')
+
+    const result = await query('update schedule set name=?, start_time=?, end_time=? , remark=?, status=? where id = ?', [name, start_time, end_time, remark, status, id])
+
+    if (result) {
+      res.send({
+        code: 200,
+        msg: '更新成功'
+      })
+      res.end()
+    } else {
+      res.send({
+        code: 300,
+        err: '未知错误'
+      })
+      res.end()
+    }
+  }
+}) 
+// 查看单个日程
+router.post('/info/:id', async(req, res, next) => {
+  if (!isExpire(req, res)) {
+    const id = req.params.id
+
+    const result = await query('select * from schedule where id = ?', [id])
+
+    if (result.length !== 0) {
+      res.send({
+        code: 200,
+        data: result[0],
+        msg: '成功'
+      })
+      res.end()
+    } else {
+      res.send({
+        code: 300,
+        err: '未找到对应日程'
+      })
+      res.end()
+    }
+  }
 })
 
 module.exports = router
