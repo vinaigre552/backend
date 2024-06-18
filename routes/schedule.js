@@ -57,6 +57,27 @@ router.post('/info', async(req, res, next) => {
   } 
 })
 
+// 删除日程
+router.delete('/info/delete/:id', async(req, res, next) => {
+  if (!isExpire(req, res)) {
+    const id = req.params.id
+    const result = await query('delete from schedule where id = ?', [id])
+    if (result) {
+      res.send({
+        code: 200,
+        data: '',
+        msg: '删除成功'
+      })
+      res.end()
+    } else {
+      res.send({
+        code: 300,
+        err: '未知错误'
+      })
+    }
+  }
+})
+
 // 更新日程信息
 router.post('/info/update', async(req, res, next) => {
   if (!isExpire(req, res)) {
@@ -107,7 +128,7 @@ router.post('/info/status', async(req, res, next) => {
 })
 
 // 查看单个日程 -- 要放到最下面匹配，否则会阻止其他info后面内容的匹配
-router.post('/info/:id', async(req, res, next) => {
+router.post('/info/search/:id', async(req, res, next) => {
   if (!isExpire(req, res)) {
     const id = req.params.id
 
