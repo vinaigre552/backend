@@ -38,7 +38,7 @@ router.post('/info', async(req, res, next) => {
     end_time = moment(end_time).format('YYYY-MM-DD HH:DD:MM')
 
     const result = await query('insert into schedule(name, start_time, end_time, remark, status) values(?, ?, ?, ?, ?)', [name, start_time, end_time, remark, status])
-    
+
     if (result) {
       res.send({
         code: 200,
@@ -82,7 +82,31 @@ router.post('/info/update', async(req, res, next) => {
     }
   }
 }) 
-// 查看单个日程
+
+// 更新日程状态
+router.post('/info/status', async(req, res, next) => {
+  if(!isExpire(req, res)) {
+    const {status, id} = req.body
+
+    const result = await query('update schedule set status = ? where id = ?', [status, id])
+    if (result) {
+      res.send({
+        code: 200,
+        data: '',
+        msg: '更新状态成功'
+      })
+      res.end()
+    } else {
+      res.send({
+        code: 200,
+        err: '未知错误'
+      })
+      res.end()
+    }
+  }
+})
+
+// 查看单个日程 -- 要放到最下面匹配，否则会阻止其他info后面内容的匹配
 router.post('/info/:id', async(req, res, next) => {
   if (!isExpire(req, res)) {
     const id = req.params.id
