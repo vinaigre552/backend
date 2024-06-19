@@ -3,6 +3,8 @@ const router = express.Router()
 const isExpire = require('../utils/common')
 const query = require('../sql')
 const moment = require('moment')
+const dayjs = require('dayjs')
+
 // 获取日程列表
 router.post('/', async (req, res, next) => {
   if (!isExpire(req, res)) {
@@ -33,11 +35,11 @@ router.post('/', async (req, res, next) => {
 router.post('/info', async(req, res, next) => {
   if (!isExpire(req, res)) {
     const schedule = req.body
-    let {name, start_time, end_time, remark, status} = schedule
+    let {name, start_time, end_time, remark, status, time_left} = schedule
     start_time = moment(start_time).format('YYYY-MM-DD HH:DD:MM')
     end_time = moment(end_time).format('YYYY-MM-DD HH:DD:MM')
 
-    const result = await query('insert into schedule(name, start_time, end_time, remark, status) values(?, ?, ?, ?, ?)', [name, start_time, end_time, remark, status])
+    const result = await query('insert into schedule(name, start_time, end_time, remark, status, time_left) values(?, ?, ?, ?, ?, ?)', [name, start_time, end_time, remark, status, time_left])
 
     if (result) {
       res.send({
@@ -82,11 +84,11 @@ router.delete('/info/delete/:id', async(req, res, next) => {
 router.post('/info/update', async(req, res, next) => {
   if (!isExpire(req, res)) {
     const schedule = req.body
-    let {id, name, start_time, end_time, remark, status} = schedule
+    let {id, name, start_time, end_time, remark, status, time_left} = schedule
     start_time = moment(start_time).format('YYYY-MM-DD HH:DD:MM')
     end_time = moment(end_time).format('YYYY-MM-DD HH:DD:MM')
 
-    const result = await query('update schedule set name=?, start_time=?, end_time=? , remark=?, status=? where id = ?', [name, start_time, end_time, remark, status, id])
+    const result = await query('update schedule set name=?, start_time=?, end_time=? , remark=?, status=?, time_left=? where id = ?', [name, start_time, end_time, remark, status, time_left, id])
 
     if (result) {
       res.send({
